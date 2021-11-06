@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as express from "express";
 import * as mongoose from "mongoose";
+import Currency from "./models/currency"
 
 // [DB Connection]
 
@@ -17,11 +18,11 @@ async function connectToDatabase(connectionUri: string) {
     // From mongoose@6.x.x onwards useNewUrlParser, useUnifiedTopology,
     // useCreateIndex are deprecated and default to true
     mongoose
-      .connect("mongodb://home-assignment-db:27017/testdb")
-      .then(() => resolve("mongodb://home-assignment-db:27017/testdb"))
+      .connect(connectionUri)
+      .then(() => resolve(connectionUri))
       .catch((error: any) => {
         console.log(error);
-        reject(`${"mongodb://home-assignment-db:27017/testdb"}: ${error}`);
+        reject(`${connectionUri}: ${error}`);
       });
   });
 }
@@ -39,10 +40,13 @@ app.get("/health", async (req, res) => {
 });
 
 app.get("/currency", async (req, res) => {
-  res.status(200).json({ healthy: true });
+  const currencies = await Currency.find()
+  res.status(200).json({ currencies });
 });
 
 app.post("/currency", async (req, res) => {
+  const currency = new Currency({ name: req.body.name });
+  await currency.save();
   res.status(201).send(req.body);
 });
 
