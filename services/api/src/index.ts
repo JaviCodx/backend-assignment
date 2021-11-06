@@ -1,7 +1,9 @@
 import * as path from "path";
 import * as express from "express";
 import * as mongoose from "mongoose";
-import Currency from "./models/currency"
+import axios from "axios";
+import Currency from "./models/currency";
+
 
 // [DB Connection]
 
@@ -40,18 +42,26 @@ app.get("/health", async (req, res) => {
 });
 
 app.get("/currency", async (req, res) => {
-  const currencies = await Currency.find()
+  const currencies = await Currency.find();
   res.status(200).json({ currencies });
 });
 
 app.post("/currency", async (req, res) => {
-  const currency = new Currency({ name: req.body.name });
-  await currency.save();
-  res.status(201).send(req.body);
+  try {
+    if (!req.body.code)
+      return res.status(422).json({ error: "Code is required" });
+    const currency = new Currency({ code: req.body.code });
+    const savedCurrency = await currency.save();
+    res.status(201).send(savedCurrency);
+  } catch (err) {
+    res.status(422).send({ error: err.message });
+  }
 });
 
-app.delete("/currency", async (req, res) => {
-  res.status(201).json({ healthy: true });
+app.delete("/currency/:code", async (req, res) => {
+  await Currency.deleteOne({ code: req.params.code });
+
+  res.status(204).json({});
 });
 
 app.use((req, res) => {

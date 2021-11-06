@@ -28,9 +28,7 @@ services:
     image: mongo:4.4.3
     container_name: home-assignment-db
     restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: pass
+    
     ports:
       - 27017:27017
     volumes:
