@@ -5,6 +5,7 @@ import axios from "axios";
 import Currency from "./models/currency";
 
 
+
 // [DB Connection]
 
 declare var MONGODB_URI: string;
@@ -51,7 +52,7 @@ app.post("/currency", async (req, res) => {
     if (!req.body.code)
       return res.status(422).json({ error: "Code is required" });
     const currency = new Currency({ code: req.body.code });
-    const savedCurrency = await currency.save();
+    const savedCurrency  = await currency.save();
     res.status(201).send(savedCurrency);
   } catch (err) {
     res.status(422).send({ error: err.message });
