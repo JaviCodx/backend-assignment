@@ -1,5 +1,6 @@
 import * as mongoose from "mongoose";
 import {CurrencyInterface} from "../types"
+import CurrencyData from "./currencyData"
 
 const currencySchema = new mongoose.Schema<CurrencyInterface>({
   code: {
@@ -9,6 +10,12 @@ const currencySchema = new mongoose.Schema<CurrencyInterface>({
     index: true,
     
   },
+  currencyDataArray: [
+    {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: CurrencyData,
+    },
+],
 });
 
 currencySchema.set("toJSON", {

@@ -22,3 +22,6 @@ services:
       - 27017:27017
     volumes:
       - ./dump:/dbdump
+
+    logging:
+      driver: "none"  

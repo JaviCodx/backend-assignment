@@ -1,1 +1,1 @@
-*/5 * * * * yarn --cwd /app start
+*/1 * * * * yarn --cwd /app start

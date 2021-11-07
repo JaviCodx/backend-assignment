@@ -8,6 +8,7 @@ WORKDIR /app
 
 # Install the dependenciess
 ENV MONGODB_URI="mongodb://home-assignment-db:27017/testdb"
+ENV THIRD_PARTY_BASE_URL="https://www.alphavantage.co/"
 RUN yarn install
 RUN yarn build
 
