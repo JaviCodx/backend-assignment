@@ -18,11 +18,9 @@ const currencyDataSchema = new mongoose.Schema({
         type:Date,
         required:true,
     },
-    currency: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref:"Currency",
-        required: true,
-    }
+    askDiff: Number,
+    spreadDiff:Number,
+    bidDiff:Number,
 
    
   })

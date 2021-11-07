@@ -2,15 +2,16 @@ import * as path from 'path';
 import * as mongoose from 'mongoose';
 import { CurrencyInterface, CurrencyDataInterface } from './types';
 import CurrencyModel from './models/currency';
-import CurrencyDataModel from "./models/currencyData"
+import CurrencyDataModel from './models/currencyData';
 import axios from 'axios';
 import * as dotenv from 'dotenv';
+import * as moment from 'moment';
 
 dotenv.config();
 
-if(!process.env.API_KEY) {
-  console.error("NO API_KEY...exiting")
-  process.exit(1)
+if (!process.env.API_KEY) {
+    console.error('NO API_KEY...exiting');
+    process.exit(1);
 }
 
 // [DB Connection]
@@ -64,10 +65,11 @@ const getCurrencyData = async ({ code }: { code: string }): Promise<CurrencyData
 
     const data = res.data?.['Realtime Currency Exchange Rate'];
 
-    if(!data || data["Error Message"]) {
-        console.error(`Error retrieving data from ${code}`)
-        return undefined
+    if (!data || data['Error Message']) {
+        console.error(`Error retrieving data from ${code}`);
+        return undefined;
     }
+
     const currencyData: CurrencyDataInterface = {
         code,
         bid: Number(data['8. Bid Price']),
@@ -78,32 +80,54 @@ const getCurrencyData = async ({ code }: { code: string }): Promise<CurrencyData
 
     return currencyData;
 };
-const saveCurrencyData = async({bid,ask,spread,code,time}) => {
+const saveCurrencyData = async ({ bid, ask, spread, code, time }) => {
+    const currency = await CurrencyModel.findOne({ code });
 
+    const newCurrencyData = new CurrencyDataModel({
+        bid,
+        ask,
+        spread,
+        time,
+        currency: currency._id,
+    });
 
- const currency = await CurrencyModel.findOne({code})
+    const hourBeforeData = moment(time).subtract(1, 'hours');
 
- const newCurrencyData = new CurrencyDataModel ({
-    bid,ask,spread,time,
-    currency: currency._id
- })
+    const { currencyDataArray: previousHourCurrencyData } = await CurrencyModel.findOne({ code }).populate({
+        path: 'currencyDataArray',
+        match: { time: { $gte: hourBeforeData.toDate(), $lte: time } },
+    });
 
-const savedCurrencyData = await newCurrencyData.save()
+    //For the first time this runs, there will be no data so difference will be 0
+    const previousHourMeanBid: number = previousHourCurrencyData.length
+        ? previousHourCurrencyData.reduce((acc, val) => acc + val.bid, 0) / previousHourCurrencyData.length
+        : bid;
 
-console.log(currency)
+    const previousHourMeanAsk: number = previousHourCurrencyData.length
+        ? previousHourCurrencyData.reduce((acc, val) => acc + val.ask, 0) / previousHourCurrencyData.length
+        : ask;
 
-currency.currencyDataArray = currency.currencyDataArray.concat(savedCurrencyData._id)
+    const previousHourMeanSpread: number = previousHourCurrencyData.length
+        ? previousHourCurrencyData.reduce((acc, val) => acc + val.spread, 0) / previousHourCurrencyData.length
+        : spread;
 
- 
-return await currency.save()
-}
+    newCurrencyData.bidDiff = Math.abs(previousHourMeanBid - bid);
+    newCurrencyData.askDiff = Math.abs(previousHourMeanAsk - ask);
+    newCurrencyData.spreadDiff = Math.abs(previousHourMeanSpread - spread);
+
+    const savedCurrencyData = await newCurrencyData.save();
+
+    currency.currencyDataArray = currency.currencyDataArray.concat(savedCurrencyData._id);
+
+    return await currency.save();
+};
 
 const getApiDataService = async () => {
     const currencies = await getDBCurrencies();
 
     const currenciesData = await Promise.all(currencies.map(getCurrencyData));
 
-    const savedCurrenciesData = await Promise.all(currenciesData.filter(c=>c).map(saveCurrencyData));
+    const savedCurrenciesData = await Promise.all(currenciesData.filter((c) => c).map(saveCurrencyData));
 
     // console.log(savedCurrenciesData);
     process.exit(0);

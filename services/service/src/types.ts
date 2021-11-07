@@ -12,5 +12,8 @@ export interface CurrencyDataInterface {
     ask:number,
     time: Date,
     spread:number,
+    bidDiff?:number,
+    askDiff?:number,
+    spreadDiff?:number,
     currency?
 }
