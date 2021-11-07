@@ -3,7 +3,7 @@ import * as express from 'express';
 import * as mongoose from 'mongoose';
 import Currency from './models/currency';
 import { CurrencyInterface } from './types';
-import * as moment from 'moment';
+
 
 // [DB Connection]
 
@@ -96,7 +96,25 @@ app.delete('/currency/:code', async (req, res) => {
 });
 
 app.get('/currency/historic', async (req, res) => {
-    const currencies: CurrencyInterface[] = await Currency.find().populate('currencyDataArray');
+    const { from, to } = req.query;
+
+
+    const areValidDates = (from, to) => {
+        const fromDate = new Date(from).toString();
+        const toDate = new Date(from).toString();
+
+        return fromDate !== 'Invalid Date' && toDate !== 'Invalid Date';
+    };
+    const currencies: CurrencyInterface[] = await Currency.find().populate({
+        path: 'currencyDataArray',
+        match: {
+            ...(from &&
+                to &&
+                areValidDates(from, to) && {
+                    time: { $gte: new Date(from), $lte: new Date(to) },
+                }),
+        },
+    });
     res.status(200).json({ currencies });
 });
 
