@@ -1,7 +1,8 @@
 import * as mongoose from "mongoose";
+import { CurrencyDataInterface } from "src/types";
 
 
-const currencyDataSchema = new mongoose.Schema({
+const currencyDataSchema = new mongoose.Schema<CurrencyDataInterface>({
     bid:{
         type:Number,
         required:true,
@@ -35,6 +36,6 @@ const currencyDataSchema = new mongoose.Schema({
 
 
 
-  const CurrencyData = mongoose.model("CurrencyData", currencyDataSchema);
+  const CurrencyData = mongoose.model<CurrencyDataInterface>("CurrencyData", currencyDataSchema);
 
 export default CurrencyData;

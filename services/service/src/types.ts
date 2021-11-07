@@ -1,8 +1,7 @@
 
 export interface CurrencyInterface {
-
     code: string,
-    currencyData?,
+    currencyDataArray?,
     _id?:string
 }
 
@@ -15,5 +14,5 @@ export interface CurrencyDataInterface {
     bidDiff?:number,
     askDiff?:number,
     spreadDiff?:number,
-    currency?
+ 
 }

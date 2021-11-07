@@ -14,10 +14,11 @@
     "clean": "rm -f dist/bundle.js",
     "prestart": "npm run clean",
     "start": "NODE_ENV=development webpack --config webpack.config.cjs",
-    "poststart": "webpack --config webpack.dev.cjs"
+    "poststart": "webpack --config webpack.dev.cjs",
+    "apidoc:generate": "./node_modules/.bin/apidoc -i src/ -o doc/"
   },
   "dependencies": {
-    "axios": "^0.24.0",
+    "apidoc": "^0.50.1",
     "express": "^4.17.1",
     "mongoose": "^6.0.12"
   },

@@ -63,7 +63,7 @@ const getDBCurrencies = async (): Promise<CurrencyInterface[]> => {
 const getCurrencyData = async ({ code }: { code: string }): Promise<CurrencyDataInterface> => {
     const res = await axios.get(`query?function=CURRENCY_EXCHANGE_RATE&from_currency=${code}`);
 
-    const data = res.data?.['Realtime Currency Exchange Rate'];
+    const data = res.data?.['Realtime Currency Exchange Rate'] as CurrencyDataInterface;
 
     if (!data || data['Error Message']) {
         console.error(`Error retrieving data from ${code}`);
@@ -80,7 +80,7 @@ const getCurrencyData = async ({ code }: { code: string }): Promise<CurrencyData
 
     return currencyData;
 };
-const saveCurrencyData = async ({ bid, ask, spread, code, time }) => {
+const saveCurrencyData = async ({ bid, ask, spread, code, time }):Promise<CurrencyInterface> => {
     const currency = await CurrencyModel.findOne({ code });
 
     const newCurrencyData = new CurrencyDataModel({
@@ -129,7 +129,8 @@ const getApiDataService = async () => {
 
     const savedCurrenciesData = await Promise.all(currenciesData.filter((c) => c).map(saveCurrencyData));
 
-    // console.log(savedCurrenciesData);
+    console.log("Fetched data for: ", savedCurrenciesData.map(el=>el.code))
+
     process.exit(0);
 };
 

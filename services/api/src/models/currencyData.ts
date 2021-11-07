@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
-
-const currencyDataSchema = new mongoose.Schema({
+import { CurrencyDataInterface } from '../types';
+const currencyDataSchema = new mongoose.Schema<CurrencyDataInterface>({
     bid: {
         type: Number,
         required: true,
@@ -31,6 +31,6 @@ currencyDataSchema.set('toJSON', {
     },
 });
 
-const CurrencyData = mongoose.model('CurrencyData', currencyDataSchema);
+const CurrencyData = mongoose.model<CurrencyDataInterface>('CurrencyData', currencyDataSchema);
 
 export default CurrencyData;
